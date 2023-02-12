@@ -14,14 +14,14 @@ router.post("/", async (req, res) => {
   } else if (req.body.password === undefined) {
     res.json({ password: "required" });
   } else {
-    const exists = await AuthUser.findOne({ username: req.body.username })
-      .then()
-      .catch((err) => console.log(err));
+    const exists = await AuthUser.findOne({ username: req.body.username });
+
     if (exists) {
       const pass = await bcrypt.compare(req.body.password, exists.password);
       if (pass) {
-        const token = jwt.sign({ _id: exists._id }, process.env.SECRET);
-        res.header("auth-token", token);
+        const token = jwt.sign({ _id: exists._id }, process.env.SECRET, {
+          expiresIn: "1d",
+        });
         res.json({ email: "Successfully logged in", auth_token: token });
       } else {
         res.json({ email: "Password is incorrect" });

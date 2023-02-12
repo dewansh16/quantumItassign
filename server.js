@@ -5,6 +5,7 @@ require("dotenv/config");
 const app = express();
 app.use(express.json());
 app.use(cors());
+const authmiddleware = require("./middleware/authmiddleware");
 const PORT = process.env.PORT || 8000;
 const path = require("path");
 //Routes
@@ -13,7 +14,7 @@ app.use("/api/signup", signuproute);
 const loginroute = require("./routes/login");
 app.use("/api/login", loginroute);
 const profileroute = require("./routes/profile");
-app.use("/api/profile", profileroute);
+app.use("/api/profile", authmiddleware, profileroute);
 
 //Connecting Database
 mongoose.connect(
@@ -30,12 +31,12 @@ mongoose.connect(
 app.get("/api", (req, res) => {
   res.send(`Hello User`);
 });
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static("client/build"));
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
-  });
-}
+
+app.use(express.static("./build"));
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "build", "index.html"));
+});
+
 app.listen(PORT, () => {
   console.log(`listening to PORT ${PORT}`);
 });
